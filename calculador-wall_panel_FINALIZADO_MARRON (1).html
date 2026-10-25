@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Calculador de Wall Panel</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%234a2a14'/%3E%3Cstop offset='1' stop-color='%239a6338'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url%28%23g%29'/%3E%3Ctext x='32' y='48' text-anchor='middle' font-family='Arial,Helvetica,sans-serif' font-weight='900' font-size='46' fill='%23fff'%3EW%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:light}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Roboto',Arial,sans-serif}
+html{scroll-behavior:smooth}
+body{background:#f1e8df;min-height:100vh;padding:max(12px,env(safe-area-inset-top)) 12px max(30px,env(safe-area-inset-bottom))}
+.hidden{display:none!important}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.hero{background:linear-gradient(135deg,#4a2a14,#9a6338);color:#fff;border-radius:16px;padding:12px 14px;text-align:center;box-shadow:0 6px 18px rgba(74,42,20,.28);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px}
+.hero h1{font-size:clamp(18px,4.6vw,26px);font-weight:900;line-height:1.1;text-transform:uppercase}
+.hero .sub{font-size:12px;font-style:italic;opacity:.85;margin-top:6px}
+.card{background:#fff;border-radius:16px;box-shadow:0 4px 18px rgba(50,25,5,.1);padding:12px;display:flex;flex-direction:column;gap:9px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;width:100%;max-width:560px;margin:0 auto}
+@media(min-width:900px){.grid{max-width:1180px;grid-template-columns:minmax(380px,480px) minmax(0,1fr);align-items:start}.prev{position:sticky;top:14px}}
+.title{font-weight:900;font-size:16px;color:#3b2210}
+.fg{display:flex;flex-direction:column;gap:7px}
+.lb{font-size:13px;color:#222;font-weight:700}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.inp{display:flex;align-items:center;border:2px solid #7a4a2b;border-radius:10px;overflow:hidden;background:#fff}
+.inp input{width:100%;min-width:0;border:none;padding:8px 8px 8px 12px;font-size:20px;font-weight:700;outline:none;color:#3b2210;background:transparent}
+.inp .u{padding:0 12px 0 0;font-weight:800;color:#7a4a2b;font-size:15px}
+.inp.sm input{font-size:18px;padding:9px 6px 9px 12px}
+.tg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.bt{padding:9px 6px;border:2px solid #dccfc4;background:#faf6f2;color:#4a5560;font-weight:800;font-size:14px;border-radius:10px;cursor:pointer;transition:all .15s}
+.bt.on{background:#7a4a2b;color:#fff;border-color:#7a4a2b;box-shadow:0 3px 8px rgba(122,74,43,.3)}
+.bt:focus-visible,.inp input:focus-visible{outline:3px solid #f07f0a;outline-offset:2px}
+.pick{display:flex;gap:10px;align-items:center}
+.thumb{width:54px;height:54px;border-radius:12px;object-fit:contain;background:#fff;border:2px solid #e2d3c5;flex:none}
+.pick.none .pk-info,.pick.none .chg{display:none}.elg{display:none}.pick.none .elg{display:flex}
+.pick.none .thumb{background:#f6ede4;border-color:#dccfc4;padding:6px}
+.elg{flex:1;align-items:center;justify-content:center;text-align:center;background:linear-gradient(135deg,#4a2a14,#9a6338);color:#fff;font-size:16px;font-weight:900;padding:18px 10px;border:3px solid #f07f0a;border-radius:12px;box-shadow:0 0 0 3px rgba(240,127,10,.25),0 6px 14px rgba(74,42,20,.35);cursor:pointer}
+.elg:focus-visible{outline:3px solid #f07f0a;outline-offset:2px}
+.pk-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.pk-name{font-weight:900;font-size:16px;color:#3b2210}
+.pk-sub{font-size:12px;font-weight:700;color:#5d6b73;line-height:1.3}
+.chg{flex:none;border:2px solid #7a4a2b;background:#fff;color:#7a4a2b;border-radius:10px;padding:10px 12px;font-weight:800;font-size:13px;cursor:pointer}
+.chg:focus-visible,.opt:focus-visible,.x:focus-visible{outline:3px solid #f07f0a;outline-offset:2px}
+.ov{position:fixed;inset:0;background:rgba(30,15,5,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.mod{background:#fff;border-radius:18px;max-width:520px;width:100%;padding:16px;box-shadow:0 12px 40px rgba(0,0,0,.3);max-height:90vh;overflow:auto}
+.mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.mh b{font-size:18px;font-weight:900;color:#3b2210;text-transform:uppercase}
+.x{border:none;background:#f6ede4;color:#7a4a2b;width:38px;height:38px;border-radius:50%;font-size:20px;font-weight:800;cursor:pointer}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opt{border:2px solid #dccfc4;background:#faf6f2;border-radius:14px;padding:8px;cursor:pointer;display:flex;flex-direction:column;gap:6px;text-align:center;align-items:center}
+.opt img{width:100%;aspect-ratio:1/1;object-fit:contain;border-radius:10px;background:#fff}
+.opt.on{border-color:#7a4a2b;background:#f6ede4;box-shadow:0 0 0 3px rgba(122,74,43,.2)}
+.opt b{font-size:16px;font-weight:900;color:#3b2210}
+.opt span{font-size:12px;font-weight:700;color:#5d6b73;line-height:1.3}
+.box .rv{flex-wrap:wrap}
+.sug{margin-left:auto;align-self:center;border:2px solid #f07f0a;background:#fff4e5;color:#a05a00;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:800;cursor:pointer}
+.sug:focus-visible{outline:3px solid #7a4a2b;outline-offset:2px}
+.sg{cursor:pointer}.sg img{aspect-ratio:4/3}
+.learn{max-width:780px;width:100%;margin:0 auto;background:#fff;border-radius:16px;padding:10px;box-shadow:0 4px 18px rgba(50,25,5,.1)}
+.learn summary{list-style:none;cursor:pointer;background:#fff7ea;border:2px solid #f07f0a;border-radius:12px;padding:11px 14px;font-weight:900;font-size:15px;color:#8a4b00;display:flex;justify-content:space-between}
+.learn summary::-webkit-details-marker{display:none}
+.learn summary::after{content:"⌄";font-size:18px}.learn[open] summary::after{content:"⌃"}
+.lh{font-size:12.5px;font-weight:800;color:#a05a00;margin:10px 2px 6px}
+.steps{list-style:none;display:flex;flex-direction:column;gap:8px}
+.steps li{display:flex;gap:10px;align-items:flex-start;background:#f8f2ec;border-radius:10px;padding:8px 10px;font-size:13.5px;color:#26323a;line-height:1.4}
+.steps .n{flex:none;width:24px;height:24px;border-radius:50%;background:#7a4a2b;color:#fff;font-weight:900;font-size:13px;display:flex;align-items:center;justify-content:center}
+.steps b{color:#7a4a2b}.steps .st{display:block;font-weight:900;color:#3b2210;font-size:12px;text-transform:uppercase;letter-spacing:.4px}
+.steps em{font-style:normal;font-weight:800;color:#e07a00}
+.jump{display:none;text-align:center;text-decoration:none;background:#fff4e5;color:#a05a00;border:2px solid #f07f0a;border-radius:10px;padding:11px;font-weight:800;font-size:14px}
+@media(max-width:899px){.jump{display:block}}
+.main{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:12px;background:linear-gradient(135deg,#4a2a14,#9a6338);color:#fff;border-radius:14px;padding:7px 14px;box-shadow:0 6px 16px rgba(74,42,20,.3)}
+.main::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,.2),transparent 55%);pointer-events:none}
+.main::after{content:"";position:absolute;top:-30%;bottom:-30%;left:-45%;width:30%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg);animation:shine 3.4s ease-in-out infinite;pointer-events:none}
+@keyframes shine{0%,50%{left:-45%}100%{left:130%}}
+@keyframes pop{0%{transform:scale(1.18);text-shadow:0 0 18px #fff}100%{transform:scale(1)}}
+.main .rv span.pop{display:inline-block;animation:pop .45s ease-out}
+.main .rl,.main .rv{position:relative;z-index:1}
+.rnd{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.rnd .bt{padding:7px 4px;font-size:12.5px;border-radius:9px;box-shadow:none}
+.spec{font-size:12px;font-weight:700;color:#3d4a52;background:#f5eee7;border-left:4px solid #7a4a2b;border-radius:8px;padding:6px 9px;line-height:1.35}
+.spec b{color:#7a4a2b}.spec i{font-style:normal;color:#e07a00;font-weight:900}
+.main .rl{font-size:15px;font-weight:800;letter-spacing:.5px}
+.main .rv{display:flex;align-items:baseline;gap:8px;line-height:1}
+.main .rv span{font-weight:900;font-size:clamp(30px,8vw,38px)}
+.main .rv small{font-size:18px;font-weight:700}
+.rg{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.w2{grid-column:span 2}.w3{grid-column:span 3}
+.box{border:2.5px solid #7a4a2b;background:#f6ede4;border-radius:12px;padding:5px 8px}
+.box .rl{font-size:10px;line-height:1.15;font-weight:800;color:#5a3519;text-transform:uppercase}
+.box .rv{margin-top:3px;display:flex;align-items:baseline;gap:6px}
+.box .rv span{font-size:21px;font-weight:900;color:#7a4a2b}
+.box .rv small{font-size:11px;font-weight:800;color:#5a3519}
+.notice{display:flex;align-items:stretch;border-radius:10px;overflow:hidden;background:#fff6d1;border:1.5px solid #e0b400}
+.notice .st{flex:none;width:16px;background:repeating-linear-gradient(-45deg,#1f1f1f 0 8px,#ffd400 8px 16px)}
+.notice .tx{flex:1;padding:6px 9px;font-size:11.5px;font-weight:700;color:#4a3b00;line-height:1.35}
+.notice b{display:block;font-size:13px;font-weight:900;letter-spacing:.8px;color:#7a1f00}
+.ptitle{font-size:20px;font-weight:900;color:#3b2210}
+.psub{font-size:14px;font-weight:700;margin-top:3px;color:#7a4a2b}
+.vis{background:#f3ede7;border-radius:12px;padding:6px;min-height:120px;display:flex;align-items:center;justify-content:center}
+.vis svg{width:100%;height:auto;max-height:62vh;display:block}
+.empty{font-size:15px;font-weight:700;color:#6b7780;text-align:center;padding:30px 14px;line-height:1.4}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:#f6ede4;border:2px solid #7a4a2b;color:#5a3519;border-radius:999px;padding:7px 14px;font-size:14px;font-weight:800}
+.sob{border:2px solid #e8a3a3;background:#fff5f5;border-radius:10px;padding:5px 10px;display:flex;flex-direction:column;gap:1px}
+.sob.ok{border-color:#d9bfa6;background:#faf3ec}
+.sob .t{font-size:11px;font-weight:900;color:#a00}
+.sob.ok .t{color:#7a4a2b}
+.sob .i{display:flex;justify-content:space-between;gap:8px;align-items:baseline;font-size:12.5px;color:#333}
+.sob .i b{font-size:15px;font-weight:900;color:#a00}
+.pnote{font-size:12px;color:#5d6b73;line-height:1.4}
+.legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;font-weight:700;color:#3d4a52}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:3px;vertical-align:-3px;margin-right:5px}
+.banner{width:100%;max-width:560px;margin:0 auto;border-radius:10px;display:block}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}.main::after,.main .rv span.pop{animation:none}}
+/* ---- barra superior: volver + nuevo cálculo ---- */
+.hero .back{justify-self:start}.hero .newc{justify-self:end}
+.hbtn{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.18);border:1.5px solid rgba(255,255,255,.6);color:#fff;border-radius:999px;font-weight:800;font-size:12.5px;padding:8px 13px;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background .15s}
+.hbtn:hover{background:rgba(255,255,255,.3)}
+.hbtn:focus-visible{outline:3px solid #ffd27a;outline-offset:2px}
+.hbtn.newc{background:#f07f0a;border-color:#ffd9a3;color:#fff;box-shadow:0 3px 10px rgba(0,0,0,.25)}.hbtn.newc:hover{background:#ff9419}
+.hbtn svg{width:18px;height:18px;display:block;flex:none}
+@media(max-width:760px){.hero{grid-template-columns:1fr auto;grid-template-areas:"b n" "t t"}.hero .back{grid-area:b}.hero .newc{grid-area:n}.hero .ht{grid-area:t}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <a class="hbtn back" href="https://capacitacion3vesmartin-ves.github.io/campuscapacitacion/" target="_top">‹ Volver al Campus</a>
+    <div class="ht"><h1>Calculador de wall panel</h1><div class="sub">By: Capacitación V.E.S.</div></div>
+    <button type="button" class="hbtn newc" onclick="newCalc()" title="Nuevo cálculo" aria-label="Nuevo cálculo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v4.5h-4.5"/><path d="M12 9v6M9 12h6"/></svg><span>Nuevo cálculo</span>
+    </button>
+  </header>
+  <div class="grid">
+    <section class="card">
+      <div class="tg"><button type="button" class="bt on" id="md-dim" onclick="setModo('dim')">Altura × ancho</button><button type="button" class="bt" id="md-m2" onclick="setModo('m2')">Solo m²</button></div>
+      <div class="row2" id="row-dim">
+        <div class="fg"><label class="lb" for="alt">Altura de pared *</label>
+          <div class="inp"><input type="number" id="alt" step="0.01" min="0" placeholder="0.00" inputmode="decimal" onfocus="this.select()" oninput="calc()"><span class="u">m</span></div></div>
+        <div class="fg"><label class="lb" for="anc">Ancho de pared *</label>
+          <div class="inp"><input type="number" id="anc" step="0.01" min="0" placeholder="0.00" inputmode="decimal" onfocus="this.select()" oninput="calc()"><span class="u">m</span></div></div>
+      </div>
+      <div class="fg hidden" id="g-m2"><label class="lb" for="m2">Área de la pared *</label>
+        <div class="inp"><input type="number" id="m2" step="0.01" min="0" placeholder="0.00" inputmode="decimal" onfocus="this.select()" oninput="calc()"><span class="u">m²</span></div></div>
+      <div class="pick none" id="pick"><img class="thumb" id="pk-img" alt="" onerror="this.style.visibility='hidden'"><div class="pk-info"><div class="pk-name" id="pk-name"></div><div class="pk-sub" id="pk-sub"></div></div><button type="button" class="chg" onclick="openPick()">⇄ Cambiar</button><button type="button" class="elg" onclick="openPick()">Elegir wall panel ›</button></div>
+            <div class="fg hidden" id="g-pvc"><label class="lb" for="pvc">Ancho de la varilla PVC *</label>
+        <div class="inp"><input type="number" id="pvc" step="1" min="0" placeholder="0" inputmode="numeric" onfocus="this.select()" oninput="calc()"><span class="u">mm</span></div></div>
+      <a class="jump" href="#prev">Ver cómo queda instalado ↓</a>
+
+      <div class="title">Resultado</div>
+      <div class="main"><div class="rl" id="m-l">Wall panel:</div><div class="rv"><span id="m-v">0</span><small id="m-u">cajas</small></div></div>
+      <div class="rnd"><button type="button" class="bt" id="rd-real" onclick="setRound('real')">Ver real</button><button type="button" class="bt on" id="rd-up" onclick="setRound('up')">Redondear ↑ arriba</button><button type="button" class="bt" id="rd-down" onclick="setRound('down')">Redondear ↓ abajo</button></div>
+      <div class="rg">
+        <div class="box"><div class="rl">Área de la pared</div><div class="rv"><span id="r-area">0</span><small>m²</small></div></div>
+        <div class="box w3"><div class="rl" id="sil-l">Silicona estructural</div><div class="rv"><span id="r-sil">0</span><small>tubos</small><button type="button" class="sug" id="sil-b" onclick="openM('ov2')">Sugerencias ›</button></div></div>
+        <div class="box" id="bx-ini"><div class="rl">Perfil inicial</div><div class="rv"><span id="r-ini">0</span><small>pzs</small></div></div>
+        <div class="box" id="bx-fin"><div class="rl">Perfil final</div><div class="rv"><span id="r-fin">0</span><small>pzs</small></div></div>
+        <div class="box" id="bx-sup"><div class="rl">Perfil superior</div><div class="rv"><span id="r-sup">0</span><small>pzs</small></div></div>
+        <div class="box" id="bx-inf"><div class="rl">Perfil inferior</div><div class="rv"><span id="r-inf">0</span><small>pzs</small></div></div>
+      </div>
+    </section>
+
+    <aside class="card prev" id="prev">
+      <div class="notice"><div class="st"></div><div class="tx"><b>IMPORTANTE</b>El cálculo de materiales es aproximado. Siempre hay posibilidad que pueda sobrar o faltar material.</div><div class="st"></div></div>
+      <div><div class="ptitle">Así quedaría instalado</div><div class="psub" id="p-sub"></div></div>
+      <div class="vis" id="p-vis"></div>
+      <div class="legend" id="p-leg"></div>
+      <div class="chips" id="p-chips"></div>
+      <div id="p-sob"></div>
+      <div class="pnote" id="p-note"></div>
+    </aside>
+  </div>
+  <details class="learn" id="lrn"><summary>📘 Aprender cómo se calcula</summary><div id="lrn-b"></div></details>
+  <img class="banner" alt="Capacitación VES" onerror="this.style.display='none'" src="https://image2url.com/r2/default/images/1774306178454-b0969afe-ce2f-4f2e-9e3f-aacfb880f5a9.jpg">
+</div>
+<div class="ov hidden" id="ov" onclick="if(event.target===this)closePick()"><div class="mod" role="dialog" aria-modal="true" aria-labelledby="mt">
+  <div class="mh"><b id="mt">Elegir wall panel</b><button type="button" class="x" id="x" onclick="closePick()" aria-label="Cerrar">✕</button></div>
+  <div class="opts">
+    <button type="button" class="opt" id="o-MDF" onclick="choose('MDF')"><img src="https://www.image2url.com/r2/default/images/1792872660583-23d5ab8d-b55e-427a-a5af-43e48c6c99f5.jpg" alt="Wall panel MDF" onerror="this.style.visibility='hidden'"><b>MDF</b><span>116 mm × 2.80 m<br>6 piezas por caja</span></button>
+    <button type="button" class="opt" id="o-PVC" onclick="choose('PVC')"><img src="https://www.image2url.com/r2/default/images/1792872703097-01b669ef-96ae-43d8-a9e7-33f34b01c8e8.jpg" alt="Wall panel PVC" onerror="this.style.visibility='hidden'"><b>PVC</b><span>2.90 m de alto<br>ancho variable, por unidad</span></button>
+  </div></div></div>
+<div class="ov hidden" id="ov2" onclick="if(event.target===this)closePick()"><div class="mod" role="dialog" aria-modal="true" aria-labelledby="mt2">
+  <div class="mh"><b id="mt2">Siliconas sugeridas</b><button type="button" class="x" onclick="closePick()" aria-label="Cerrar">✕</button></div>
+  <div class="opts"><button type="button" class="opt sg" data-n="Weber PU" onclick="pickSil(this.dataset.n)"><img src="https://www.image2url.com/r2/default/images/1792873108971-aad1a9a2-96e5-48e5-afca-2d807faf33ba.jpg" alt="Weber PU" onerror="this.style.visibility='hidden'"><b>Weber PU</b></button><button type="button" class="opt sg" data-n="PU Montaje" onclick="pickSil(this.dataset.n)"><img src="https://www.image2url.com/r2/default/images/1792873259387-9060f1f3-94d2-4d29-9b07-bacfbfe2461b.jpg" alt="PU Montaje" onerror="this.style.visibility='hidden'"><b>PU Montaje</b></button><button type="button" class="opt sg" data-n="Sikaflex 11FC" onclick="pickSil(this.dataset.n)"><img src="https://www.image2url.com/r2/default/images/1792873236697-a96f21b1-9cbc-4fb7-b6a7-c4d790f98885.jpg" alt="Sikaflex 11FC" onerror="this.style.visibility='hidden'"><b>Sikaflex 11FC</b></button><button type="button" class="opt sg" data-n="Afix PU Flex" onclick="pickSil(this.dataset.n)"><img src="https://www.image2url.com/r2/default/images/1792874272517-88e4bbdd-6fb1-4a09-99b8-eb99949f216d.jpg" alt="Afix PU Flex" onerror="this.style.visibility='hidden'"><b>Afix PU Flex</b></button></div></div></div>
+<script>
+const $=id=>document.getElementById(id);
+const r6=x=>Math.round(x*1e6)/1e6,cl=x=>Math.ceil(r6(x)),fmt=x=>String(Math.round(x*100)/100);
+let tipo='',modo='dim',rmode='up',_u=0;
+function setTipo(t){tipo=t;const p=t==='PVC';
+  pickUI();
+  $('g-pvc').classList.toggle('hidden',!p);
+  sync();calc()}
+const PK={MDF:{img:"https://www.image2url.com/r2/default/images/1792872660583-23d5ab8d-b55e-427a-a5af-43e48c6c99f5.jpg",sub:'Panel 116 mm × 2.80 m · 6 pzs por caja'},PVC:{img:"https://www.image2url.com/r2/default/images/1792872703097-01b669ef-96ae-43d8-a9e7-33f34b01c8e8.jpg",sub:'Varilla 2.90 m · ancho variable, por unidad'}};
+const PH='data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60"><path d="M6 31q6-10 12 0t12 0 12 0 12 0" fill="none" stroke="#9a6338" stroke-width="4" stroke-linecap="round" opacity=".6"/></svg>');
+function pickUI(){$('pick').classList.toggle('none',!tipo);
+  if(!tipo){$('pk-img').style.visibility='visible';$('pk-img').src=PH;$('pk-img').alt='';['MDF','PVC'].forEach(k=>$('o-'+k).classList.remove('on'));return}
+  $('pk-img').style.visibility='visible';$('pk-img').src=PK[tipo].img;$('pk-img').alt='Wall panel '+tipo;$('pk-name').textContent='Wall panel '+tipo;$('pk-sub').textContent=PK[tipo].sub;
+  ['MDF','PVC'].forEach(k=>$('o-'+k).classList.toggle('on',k===tipo))}
+function openPick(){$('ov').classList.remove('hidden');$('x').focus()}
+function closePick(){document.querySelectorAll('.ov').forEach(o=>o.classList.add('hidden'))}
+let silSel='';
+function pickSil(n){silSel=silSel===n?'':n;$('sil-l').textContent=silSel||'Silicona estructural';$('sil-b').textContent=silSel?'Cambiar ›':'Sugerencias ›';
+  document.querySelectorAll('.sg').forEach(o=>o.classList.toggle('on',o.dataset.n===silSel));closePick()}
+function openM(id){$(id).classList.remove('hidden');$(id).querySelector('.x').focus()}
+function choose(t){setTipo(t);closePick()}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closePick()});
+function sync(){const m=modo==='m2';['sup','inf'].forEach(k=>$('bx-'+k).classList.toggle('hidden',tipo==='PVC'||m));['ini','fin'].forEach(k=>{$('bx-'+k).classList.toggle('hidden',m);$('bx-'+k).classList.toggle('w2',tipo==='PVC')})}
+function setModo(m){modo=m;$('md-dim').classList.toggle('on',m==='dim');$('md-m2').classList.toggle('on',m==='m2');
+  $('row-dim').classList.toggle('hidden',m==='m2');$('g-m2').classList.toggle('hidden',m!=='m2');sync();calc()}
+function setRound(m){rmode=m;['real','up','down'].forEach(k=>$('rd-'+k).classList.toggle('on',k===m));calc()}
+const rn=x=>rmode==='real'?Math.round(x*100)/100:rmode==='up'?cl(x):Math.max(1,Math.floor(r6(x))); /* abajo: mínimo 1 */
+function out(v){$('m-v').textContent=v.main;$('m-u').textContent=v.unit;$('m-l').textContent=v.label;
+  const e=$('m-v');e.classList.remove('pop');void e.offsetWidth;e.classList.add('pop');
+  ['area','sil','ini','fin','sup','inf'].forEach(k=>$('r-'+k).textContent=v[k]??0)}
+function noDraw(msg){$('p-sub').textContent='';$('p-vis').innerHTML='<div class="empty">'+msg+'</div>';['p-leg','p-chips','p-sob','p-note'].forEach(i=>$(i).innerHTML='')}
+function empty(msg){out({main:0,unit:!tipo?'':tipo==='MDF'?'cajas':'varillas',label:!tipo?'Wall panel:':tipo==='MDF'?'Cajas de MDF:':'Varillas PVC:'});noDraw(msg)}
+const MDF_U=1.85/(6*2.8); /* ancho útil: 1.85 m² por caja de 6 piezas de 2.80 m */
+function pack(cols,H,L){ /* piezas en total, reaprovechando retazos */
+  if(H<=L+.004)return cl(cols/Math.max(1,Math.floor(r6(L/H))));
+  const n=Math.floor(r6(H/L)),r=r6(H-n*L);
+  return r<.004?cols*n:cols*n+cl(cols/Math.floor(r6(L/r)))}
+function explain(){
+  if(!tipo){$('lrn-b').innerHTML='<div class="lh">Elige un tipo de wall panel para ver cómo se calcula.</div>';return}
+  const pvc=tipo==='PVC';let H=parseFloat($('alt').value)||0,W=parseFloat($('anc').value)||0,mm=parseFloat($('pvc').value)||0,m2=parseFloat($('m2').value)||0;
+  const own=(modo==='dim'?(H>0&&W>0):m2>0)&&(!pvc||mm>20);
+  if(!own){H=2.4;W=3;mm=160;m2=7.2}
+  const d=!own||modo==='dim',L=pvc?2.9:2.8,w=pvc?(mm-20)/1000:MDF_U,area=d?r6(H*W):m2,f=x=>fmt(x),sg=w.toFixed(3);
+  const st=[];
+  st.push(['Área de la pared',d?f(H)+' m × '+f(W)+' m = <b>'+f(area)+' m²</b>':'Ya tienes el área: <b>'+f(area)+' m²</b>']);
+  st.push([pvc?'Ancho útil de la varilla':'Ancho útil del panel',pvc?'(<em>'+mm+'</em> − 20) mm = <b>'+(mm-20)+' mm</b> útiles × <em>2.90</em> m = <b>'+f(w*2.9)+' m²</b> por varilla (se descuentan 20 mm de traslape)'
+    :'<em>1.85</em> m² ÷ <em>6</em> piezas ÷ <em>2.80</em> m = <b>'+sg+' m</b> (110 mm útiles de los 116 mm)']);
+  let pz=0,cols=0;
+  if(d){cols=cl(W/w);pz=pack(cols,H,L);
+    st.push(['Columnas',f(W)+' m ÷ '+sg+' m = '+(W/w).toFixed(1)+' → <b>'+cols+' columnas</b>']);
+    let t;
+    if(H<=L+.004){const k=Math.floor(r6(L/H));t=k>1?'La pared ('+f(H)+' m) es menor que la pieza ('+L+' m): de cada pieza salen <b>'+k+'</b> tramos → '+cols+' ÷ '+k+' = <b>'+pz+'</b>':'Cada columna lleva 1 pieza ('+L+' m ≥ '+f(H)+' m) → <b>'+pz+'</b>'}
+    else{const n=Math.floor(r6(H/L)),r=r6(H-n*L);t=r<.004?n+' piezas completas por columna → <b>'+pz+'</b>':'La pared pasa '+L+' m: '+n+' pieza + un tramo de <em>'+f(r)+' m</em> (salen '+Math.floor(r6(L/r))+' tramos por pieza) → '+cols*n+' + '+(pz-cols*n)+' = <b>'+pz+'</b>'}
+    st.push(['Piezas en total',t])}
+  let main;
+  if(pvc){main=d?pz:area/(w*L);st.push(['Varillas',d?'<b>'+pz+' varillas</b>':f(area)+' ÷ '+f(w*L)+' = '+main.toFixed(2)+' → <b>'+cl(main)+' varillas</b>'])}
+  else{main=d?pz/6:area/1.85;st.push(['Cajas',(d?pz+' paneles ÷ 6 por caja = ':f(area)+' m² ÷ 1.85 m² por caja = ')+main.toFixed(2)+' → <b>'+cl(main)+' cajas</b>'])}
+  const cj=cl(main);
+  st.push(['Silicona',pvc?cj+' varillas ÷ 3 = '+(cj/3).toFixed(2)+' → <b>'+cl(cj/3)+' tubos</b>':cj+' cajas × 2 = <b>'+cj*2+' tubos</b>']);
+  if(d)st.push(['Perfiles',pvc?'Inicial y final: '+f(H)+' ÷ 2.90 → <b>'+cl(H/2.9)+'</b> c/u':'Inicial y final: '+f(H)+' ÷ 2.80 → <b>'+cl(H/2.8)+'</b> c/u · superior e inferior: '+f(W)+' ÷ 2.80 → <b>'+cl(W/2.8)+'</b> c/u']);
+  st.push(['Redondeo','«Arriba» sube al entero, «abajo» baja (mínimo 1) y «Ver real» muestra decimales. Es un cálculo aproximado.']);
+  $('lrn-b').innerHTML='<div class="lh">'+(own?'Con tus medidas':'Ejemplo: '+(pvc?'varilla de 160 mm · ':'')+'pared de 2.40 × 3 m (escribe tus medidas para verlo con tus datos)')+'</div><ol class="steps">'+st.map((x,i)=>'<li><span class="n">'+(i+1)+'</span><div><span class="st">'+x[0]+'</span>'+x[1]+'</div></li>').join('')+'</ol>'}
+function calc(){
+  explain();
+  if(!tipo)return empty('Elige primero el tipo de wall panel<br>con el botón «Elegir wall panel».');
+  const H=parseFloat($('alt').value)||0,W=parseFloat($('anc').value)||0,mm=parseFloat($('pvc').value)||0,m2=parseFloat($('m2').value)||0;
+  const dim=modo==='dim',pvc=tipo==='PVC',area=dim?r6(H*W):m2;
+  if(dim?!(H>0&&W>0):!(m2>0))return empty(dim?'Escribe la altura y el ancho<br>para ver cómo quedaría instalado.':'Escribe los m² de la pared.');
+  if(pvc&&mm<=20)return empty('Escribe el ancho de la varilla (en mm)<br>para ver cómo quedaría instalado.');
+  const L=pvc?2.9:2.8,w=pvc?(mm-20)/1000:MDF_U;
+  let cols=0,rows=0,pz=0;
+  if(dim){cols=cl(W/w);rows=cl(H/L);pz=pack(cols,H,L)}
+  const main=pvc?rn(dim?pz:area/(w*L)):rn(dim?pz/6:area/1.85);
+  const sil=pvc?rn(main/3):main*2,pl=pvc?'varilla':'caja';
+  out({main:fmt(main),unit:main===1?pl:pl+'s',label:pvc?'Varillas PVC:':'Cajas de MDF:',area:fmt(area),sil:fmt(sil),
+    ini:dim?fmt(rn(H/L)):0,fin:dim?fmt(rn(H/L)):0,sup:dim&&!pvc?fmt(rn(W/L)):0,inf:dim&&!pvc?fmt(rn(W/L)):0});
+  if(!dim)return noDraw('Con solo m² no hay dibujo.<br>Usa «Altura × ancho» para verlo instalado.');
+  preview(H,W,L,w,cols,rows,pvc,mm,pz,pvc?0:cl(pz/6));
+}
+function preview(H,W,L,w,cols,rows,pvc,mm,pz,cajas){
+  const gx=r6(cols*w-W),B=Math.max(W,H),M=B*.13,t=B*.018,lw=B/300,fs=B/22;
+  const vw=W+(gx>.004?gx:0)+M*1.12,vh=H+M*1.12,id='h'+(++_u);
+  let s='<svg viewBox="0 0 '+vw+' '+vh+'" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="'+id+'" width="'+B/50+'" height="'+B/50+'" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="'+B/50+'" stroke="#d11" stroke-width="'+lw*1.4+'"/></pattern>'
+   +'<clipPath id="c'+id+'"><rect x="'+M+'" y="'+M+'" width="'+W+'" height="'+H+'"/></clipPath></defs>';
+  s+='<rect x="'+(M-lw*2)+'" y="'+(M-lw*2)+'" width="'+(W+lw*4)+'" height="'+(H+lw*4)+'" fill="#4a545c"/>';
+  s+='<g clip-path="url(#c'+id+')">';
+  for(let i=0;i<cols;i++){const x=M+i*w;
+    for(let r=0;r<rows;r++){const y=M+r*L,ph=Math.min(L,H-r*L);
+      const base=pvc?(i%2?'#e3e8ec':'#eef1f3'):(i%2?'#b88a5c':'#c4986a');
+      s+='<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+ph+'" fill="'+base+'"/>';
+      if(pvc)s+='<rect x="'+x+'" y="'+y+'" width="'+w*.08+'" height="'+ph+'" fill="#9aa5ad" opacity=".45"/><rect x="'+(x+w*.92)+'" y="'+y+'" width="'+w*.08+'" height="'+ph+'" fill="#fff" opacity=".7"/>';
+      else s+='<line x1="'+(x+w*.5)+'" y1="'+y+'" x2="'+(x+w*.5)+'" y2="'+(y+ph)+'" stroke="#6b3f1c" stroke-opacity=".18" stroke-width="'+lw+'"/>';
+      s+='<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+ph+'" fill="none" stroke="'+(pvc?'#7d8a93':'#5a3515')+'" stroke-opacity=".55" stroke-width="'+lw*1.2+'"/>';}}
+  for(let r=1;r<rows;r++)s+='<line x1="'+M+'" y1="'+(M+r*L)+'" x2="'+(M+W)+'" y2="'+(M+r*L)+'" stroke="#fff" stroke-width="'+lw*3+'"/>';
+  s+='</g>';
+  const pc='#2f3a41';
+  s+='<rect x="'+M+'" y="'+M+'" width="'+t+'" height="'+H+'" fill="'+pc+'"/><rect x="'+(M+W-t)+'" y="'+M+'" width="'+t+'" height="'+H+'" fill="'+pc+'"/>';
+  if(!pvc)s+='<rect x="'+M+'" y="'+M+'" width="'+W+'" height="'+t+'" fill="'+pc+'"/><rect x="'+M+'" y="'+(M+H-t)+'" width="'+W+'" height="'+t+'" fill="'+pc+'"/>';
+  if(gx>.004)s+='<rect x="'+(M+W)+'" y="'+M+'" width="'+gx+'" height="'+H+'" fill="url(#'+id+')" stroke="#d11" stroke-width="'+lw*2+'" stroke-dasharray="'+lw*6+' '+lw*4+'"/>';
+  const tx=(x,y,txt,c,rot)=>'<text '+(rot?'transform="translate('+x+' '+y+') rotate(-90)"':'x="'+x+'" y="'+y+'"')+' text-anchor="middle" font-size="'+fs+'" font-weight="800" fill="'+c+'">'+txt+'</text>';
+  s+=tx(M+W/2,M*.62,fmt(W)+' m','#d11')+tx(M*.5,M+H/2,fmt(H)+' m','#7a4a2b',1);
+  s+='</svg>';$('p-vis').innerHTML=s;
+  $('p-sub').textContent=(pvc?'Varillas PVC de '+mm+' mm':'Wall panel MDF')+' · '+fmt(W)+' m × '+fmt(H)+' m';
+  $('p-leg').innerHTML='<span><i style="background:#2f3a41"></i>Perfiles</span><span><i style="background:repeating-linear-gradient(45deg,#d11 0 2px,#fff 2px 5px);border:1px solid #d11"></i>Sobra</span>';
+  $('p-chips').innerHTML='<span class="chip">'+cols+' columnas</span><span class="chip">'+pz+(pvc?(pz===1?' varilla':' varillas'):' paneles')+'</span>'+(pvc?'':'<span class="chip">'+cajas+(cajas===1?' caja':' cajas')+' · 6 pzs c/u</span>');
+  const items=[],ret=r6(L-Math.floor(r6(L/H))*H);
+  if(gx>.004)items.push({d:fmt(gx*100)+' cm × '+fmt(H)+' m',x:'recorte última columna'});
+  if(H<L-.004&&ret>.004)items.push({d:fmt(ret)+' m',x:'retazo por pieza'});
+  if(!pvc&&cajas*6-pz>0)items.push({d:(cajas*6-pz)+(cajas*6-pz===1?' panel':' paneles'),x:'completos en la última caja'});
+  $('p-sob').innerHTML=items.length?'<div class="sob"><div class="t">Lo que sobra</div>'+items.map(i=>'<div class="i"><b>'+i.d+'</b><span>'+i.x+'</span></div>').join('')+'</div>'
+    :'<div class="sob ok"><div class="t">Lo que sobra</div><b style="color:#7a4a2b;font-size:16px">No sobra material</b></div>';
+  const k=H<=L+.004?Math.floor(r6(L/H)):0;
+  $('p-note').textContent=(pvc?'Las varillas van en vertical y la última se corta a lo ancho. ':'Panel de 116 mm × 2.80 m (110 mm útiles); 6 piezas por caja. ')
+   +(rows>1?'La pared mide más que la pieza ('+L+' m): se completa con un tramo adicional arriba (línea blanca). ':'')
+   +(k>1?'Cada pieza rinde '+k+' tramos: el retazo se reaprovecha.':'');
+}
+/* Nuevo cálculo: deja todo en blanco para el siguiente cliente */
+function newCalc(){
+  ['alt','anc','m2','pvc'].forEach(i=>$(i).value='');
+  silSel='';$('sil-l').textContent='Silicona estructural';$('sil-b').textContent='Sugerencias ›';
+  document.querySelectorAll('.sg').forEach(o=>o.classList.remove('on'));
+  closePick();$('lrn').open=false;
+  setTipo('');setModo('dim');setRound('up');
+  window.scrollTo({top:0,behavior:'smooth'});$('alt').focus({preventScroll:true})}
+pickUI();calc();
+</script>
+</body>
+</html>
